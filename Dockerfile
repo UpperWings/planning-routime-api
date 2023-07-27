@@ -1,11 +1,7 @@
-FROM eclipse-temurin:17-jdk-focal
+FROM openjdk:17.0.2-jdk
 
 WORKDIR /app
 
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-RUN ./mvnw dependency:go-offline
+COPY ./target .
 
-COPY src ./src
-
-CMD ["./mvnw", "spring-boot:run"]
+CMD ["java", "-jar", "./planningroutime.api-0.0.1-SNAPSHOT.jar", "-DDB_HOST=${DB_HOST}"]

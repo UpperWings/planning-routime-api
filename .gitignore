@@ -1,6 +1,9 @@
 #Projects files
 application.properties
 
+/nginx
+/database
+
 
 
 
