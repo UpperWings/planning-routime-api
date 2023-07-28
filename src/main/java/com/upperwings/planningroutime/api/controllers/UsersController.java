@@ -22,6 +22,9 @@ public class UsersController {
     @PostMapping
     @Transactional
     public ResponseEntity create(@RequestBody @Valid UserRecordDto userRecordDto){
+        System.out.println("Request recebida");
+        System.out.println(userRecordDto);
+
         var user = new UserModel(userRecordDto);
         userRepository.save(user);
         return ResponseEntity.noContent().build();
