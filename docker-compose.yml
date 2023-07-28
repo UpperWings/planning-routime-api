@@ -3,22 +3,21 @@ version: '3.1'
 services:
   app:
     container_name: app
+    network_mode: host
     build:
       dockerfile: ./Dockerfile
       context: ./
-    ports:
-      - "8080:8080"
     environment:
       DB_HOST: postgres
     depends_on:
       - postgres
+    networks:
+      - host
 
   postgres:
     container_name: db
     image: postgres
     restart: always
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: root
@@ -26,13 +25,41 @@ services:
     volumes:
       - ./database:/var/lib/postgresql/data/pgdata
 
-  nginx:
-    container_name: loadbalance
-    image: nginx
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/logs:/var/log/nginx
-    ports:
-      - "443:443"
-    environment:
-      - NGINX_PORT=443
+#  nginx:
+#    container_name: loadbalance
+#    image: nginx
+#    volumes:
+#      - ./nginx.conf:/etc/nginx/nginx.conf
+#      - ./nginx/logs:/var/log/nginx
+#    ports:
+#      - "443:443"
+#    environment:
+#      - NGINX_PORT=443
+
+
+    if ($request_method = 'OPTION') {
+      add_header Access-Control-Allow-Origin "*";
+      add_header Access-Control-Allow-Credentials "true";
+      add_header Access-Control-Allow-Methods "*";
+      add_header Access-Control-Allow-Headers "*";
+      return 200;
+    }
+
+server { # simple load balancing
+    listen          80;
+    server_name     upperwings.xyz;
+  
+    location ~ ^/(.*) {
+      if ($request_method = 'OPTIONS') {
+        add_header Access-Control-Allow-Origin "*";
+        add_header Access-Control-Allow-Credentials "true";
+        add_header Access-Control-Allow-Methods "*";
+        add_header Access-Control-Allow-Headers "*";
+        return 200;
+      }
+    proxy_pass http://172.31.81.95:8080$request_uri;
+  }
+}
+
+
+
